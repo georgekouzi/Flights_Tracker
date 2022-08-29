@@ -94,19 +94,21 @@ function getFlightsNumber(data){
 
 
 function getTLVWeather(data,arrFlightsNumber){
- 
     for (let j = 0; j < data.length; j++) {
+      if(arrFlightsNumber){
       if (data[j].flightNumber == arrFlightsNumber[0]) {
         return data[j].arrivalWeather;      
       }
-      
+    }else{
+      return data[j].departureWeahter;
+    }
     }
 }
 
 
 const server = express()
   .use(app)
-  .listen(3000, () => console.log(`Listening Socket on http://localhost:3000`));
+  .listen(port, () => console.log(`Listening Socket on http://localhost:${port}`));
 const io = socketIO(server);
 
 function getFlightsDataByNumber(data,flights){

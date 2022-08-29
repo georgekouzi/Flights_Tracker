@@ -1,10 +1,9 @@
-// require('dotenv').config();
 
 const uuid = require("uuid");
 const Kafka = require("node-rdkafka");
 
 const redis = require(`../../Redis/redisRWAdapter`)
-// const MongoDB = require("../../MongoDB/MongoDB")
+const MongoDB = require("../../MongoDB/MongoDB")
 const kafkaConf = {
   "group.id": "kafka",
   "metadata.broker.list":"moped-01.srvs.cloudkafka.com:9094,moped-02.srvs.cloudkafka.com:9094,moped-03.srvs.cloudkafka.com:9094".split(","),
@@ -31,7 +30,7 @@ consumer.on("error", function(err) {
 });
 
 consumer.on("ready", function(arg) {
-  console.log(`Consumer ${arg.name} ready`);
+  // console.log(`Consumer ${arg.name} ready`);
   consumer.subscribe(topics);
   consumer.consume();
 });

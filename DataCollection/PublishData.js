@@ -67,7 +67,7 @@ async function publishAndStor(){
                     
                 })
                 var dest = calcCrow(dep_lat_lng[0],dep_lat_lng[1],arr_lat_lng[0],arr_lat_lng[1])
-                console.log(dest)
+                // console.log(dest)
                 if(dest <= 1500){
                     typeOfFlight = 'Short Flight';
                 }else if (dest <= 3500) {

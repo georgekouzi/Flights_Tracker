@@ -37,7 +37,6 @@ function getWeather(countryCode){
             const temperatureK = response.data.main.temp;
             // temperature in celsius
             const weatherData = (temperatureK - 273.15).toFixed(2) ;
-               
             // console.log(weatherData)
             res(weatherData)
         

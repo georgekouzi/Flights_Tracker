@@ -28,83 +28,82 @@ function createModel(){
     }
   });
 }
-
-
-async function predictTopic(flightNumber,period,month,day,airline,departureAirport,arrivalAirport,typeOfFlight,departureWeahter,arrivalWeather){
-      // console.log("the data = " ,flightNumber,period,month,day,airline,departureAirport,arrivalAirport,typeOfFlight,departureWeahter,arrivalWeather+"\n")
-
-      return await new Promise( res =>{
-        var connection = new bigml.BigML('georgekouzi','54a157821e41db27c27380d9823dc563db53f214')
-        var source = new bigml.Source(connection);
-        source.create('../bigML/MongoData.csv',true, async function(error, sourceInfo) {
-          if(error) {
-            console.log("ERROR1")
-            throw error;}
-          if (!error && sourceInfo) {
-            var dataset = new bigml.Dataset(connection);
-            dataset.create(sourceInfo, async function(error, datasetInfo) {
-              if(error) {
-                console.log("ERROR2")
-                throw error;}
-              if (!error && datasetInfo) {
-              var predictionInput= {
-                flightNumber :flightNumber,
-                period: period,
-                month : month,
-                day : day,
-                airline : airline,
-                departureAirport : departureAirport,
-                arrivalAirport : arrivalAirport,
-                typeOfFlight : typeOfFlight,
-                departureWeahter : departureWeahter,
-                arrivalWeather : arrivalWeather
-            }
-            var prediction =  new bigml.Prediction(connection);
-            if(predictionInput){
-              // console.log("predictionInput" + JSON.stringify(predictionInput) + "\n")
-              prediction.create('model/62fd33bb8be2aa7156000011',predictionInput, async function(error, prediction) {
-              if(error) {
-                console.log("ERROR3")
-                throw error;}
-    
-             const output = await prediction.object.probabilities;
-             var predictedTopic ,num1 = output[0][1],num2= output[1][1],num3= output[2][1];
-             if(num1 > num2 && num1 > num3) {
-              predictedTopic = output[0][0];
-              }
-              else if (num2 >= num1 && num2 >= num3) {
-                predictedTopic = output[1][0];
-              }
-              else {
-                predictedTopic = output[2][2];
-              }
-            
-    
-              res(predictedTopic)    
-            }
-          );}
-          }
-        });
-      
-        }
-      });
-    }) 
-    }
-
-    async function GetPred(flightNumber,period,month,day,airline,departureAirport,arrivalAirport,typeOfFlight,departureWeahter,arrivalWeather){
+async function predictTopic(element){
   
-      var ans = await predictTopic(flightNumber,period,month,day,airline,departureAirport,arrivalAirport,typeOfFlight,departureWeahter,arrivalWeather);
-      console.log("predection = " + ans)
-      return ans;
+  // console.log("\nthe data = " ,flightNumber,period,month,day,airline,departureAirport,arrivalAirport,typeOfFlight,departureWeahter,arrivalWeather+"\n")
+ 
+  return  new Promise( res =>{
+ 
+    var connection = new bigml.BigML('georgekouzi','54a157821e41db27c27380d9823dc563db53f214')
+
+    var source = new bigml.Source(connection);
+    source.create('../bigML/MongoData.csv',true, async function(error, sourceInfo) {
+      if(error) throw error;
+      if (!error && sourceInfo) {
+        var dataset = new bigml.Dataset(connection);
+        dataset.create(sourceInfo, async function(error, datasetInfo) {
+          if(error) throw error;
+          
+          if (!error && datasetInfo) {
+
+              var predictionInput= {
+                flightNumber : element.flightNumber,
+                period : element.period,
+                month : element.month ,
+                day : element.day,
+                airline : element.airline,
+                departureAirport : element.departureAirport,
+                arrivalAirport : element.arrivalAirport,
+                typeOfFlight : element.typeOfFlight,
+                departureWeahter : element.departureWeahter  ,
+                arrivalWeather : element.arrivalWeather
+              } 
+
+              var prediction =  new bigml.Prediction(connection);
+              if(predictionInput && prediction ){
+              prediction.create('model/6303c8968f679a2d54000820',predictionInput, async function(error, prediction) {
+                if(error) throw error;
+              const output = await prediction.object.probabilities;
+              var num1 = output[0][1],num2= output[1][1],num3= output[2][1];
+              if(num1 > num2 && num1 > num3) {
+                res( output[0][0]);
+                return;
+                }
+                else if (num2 >= num1 && num2 >= num3) {
+                res( output[1][0]);
+                return;
+                }
+                else {
+                  res( output[2][0]);
+                return;
+                
+                }
+        });
+      }
+      }
+    });
+    
     }
-    function sleep(ms) {
-      return new Promise((resolve) => {
-        setTimeout(resolve, ms);
-      });
-    }
+  });
+   
+}) 
+ 
+}
+
+async function GetPred(element){
+  // console.log("\nflights data = ",flightNumber,period,month,day,airline,departureAirport,arrivalAirport,typeOfFlight,departureWeahter,arrivalWeather)
+ 
+  var ans =  predictTopic(element);
+ 
+  return ans;
+}
 
 
-// GetPred("740","summer","april",8,"AIZ","CDG","TLV","long","29.98","29.98").then(res=> console.log(res));
+// predictTopic("5123","summer","August","Monday","AIZ","TLV","AMS","short","31.62","31.69").then(res=> console.log(res));
+
+// predictTopic("5013","summer","February","Tuesday","AIZ","TLV","AMS","short","31.62","31.69").then(res=> console.log(res));
+ 
+// predictTopic("5134","summer","May","Friday","AIZ","TLV","AMS","short","31.62","31.69").then(res=> console.log(res));
 // createModel()
 // module.exports.predictTopic= predictTopic;
 module.exports.GetPred = GetPred;

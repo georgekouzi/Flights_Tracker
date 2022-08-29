@@ -1,4 +1,3 @@
-require('dotenv').config();
 const uuid = require("uuid");
 const Kafka = require("node-rdkafka");
 
