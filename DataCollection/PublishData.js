@@ -13,41 +13,39 @@ async function publishAndStor(){
         departureWeahter,
         arrivalWeather ,
         arrivalStatus ;
-        
-        // console.log("innnnn fun");
-
+    
     const p =await data.getPeriod().then(res => period = res);
 
-    
 
-    const flights_Response = await data.getFlights();
+
+    // const flights_Response = await data.getFlights();
     // [dep_iata,arr_iata,flight_iata]
+    // result = flights_Response.filter(word => word.length < 6)
+                        // console.log(flights_Response.data.length)
 
-    for (let index = 0; index < flights_Response.data.length; index++) {
+                     const departure_flights_TLV =await data.getDepartureFlightsTLV();
+                     const arrival_flights_TLV =await data.getArrivalFlightsTLV();
+                     var arrTLV = departure_flights_TLV.data.concat(arrival_flights_TLV.data) ;
+                    
 
-        const element = flights_Response.data[index];
-        
-        if(element[0]== 'TLV' || element[1] == 'TLV' ){
-                   console.log(element); 
+    for (let index = 0; index < arrTLV.length; index++) {
+        const element = arrTLV[index];
+        // console.log(element[0],element[1],element[2])
 
+
+           
     // flight_number,flag,airline_icao,lat,lng,alt,dep_iata,arr_iata,status,airline_icao,dep_time,arr_time,delayed
-            const flightInfo =await data.flightINFO(element[2])
-            
-            console.log("flightInfo: "+element[2]); 
+          
+    const flightInfo =await data.flightINFO(element[2])
+            // console.log(element[2])
+   
+                //    console.log(element[0],element[1],element[2],flightInfo.data? flightInfo.data.response: -1)
 
-            if(flightInfo.data.response){
-                console.log("flightInfo.data.response: "); 
-
-
+            if(flightInfo.data&&flightInfo.data.response){
                 if(data.getTime(flightInfo.data.response.dep_time) || data.getTime(flightInfo.data.response.arr_time)){
-
-                    console.log("data.getTime(flightInfo.data.response.dep_time) || data.getTime(flightInfo.data.response.arr_time) "); 
-
-
-
                 airline =flightInfo.data.response.airline_icao;
-                departureAirport = flightInfo.data.response.dep_iata;
-                arrivalAirport = flightInfo.data.response.arr_iata ;
+                departureAirport = element[0];
+                arrivalAirport = element[1] ;
                 
                 if(flightInfo.data.response.delayed < 15){
                     arrivalStatus = 'on time'
@@ -56,41 +54,36 @@ async function publishAndStor(){
                 }else{
                     arrivalStatus = 'severely Delayed'
                 }
-                console.log("arrivalStatus: "+arrivalStatus); 
-
 
                 var dep_lat_lng=[];
-
-                await data.getCity(departureAirport).then( res =>{
-                    // console.log(res)
+                await data.getCity(departureAirport).then(async (res) =>{
+                    // console.log(res[0])
                     if(res[0]){
                         dep_lat_lng.push(res[0].lat)
                         dep_lat_lng.push(res[0].lng)
-                        data.getWeather(res[0].name).then(ans=>{
+                        await data.getWeather(res[0].name).then((ans)=>{
                         departureWeahter = ans  ;
                                       }) ;
                     }
                     
                 }
                 )
-                console.log("dep_lat_lng: "+dep_lat_lng);
-
                 var arr_lat_lng=[];
-                await data.getCity(arrivalAirport).then(res =>{
-                    console.log(res)
+               await data.getCity(arrivalAirport).then(async (res) =>{
+                    // console.log(res[0])
                     if(res[0]){
                         arr_lat_lng.push(res[0].lat)
                         arr_lat_lng.push(res[0].lng)
-                        data.getWeather(res[0].name).then(ans =>{
+                        await data.getWeather(res[0].name).then(ans =>{
                          arrivalWeather =ans
                     })
                     }
                     
                 })
-                console.log("dep_lat_lng: "+arr_lat_lng);
-
                 var dest = calcCrow(dep_lat_lng[0],dep_lat_lng[1],arr_lat_lng[0],arr_lat_lng[1])
+                // console.log(dest,dep_lat_lng,arr_lat_lng)
                 // console.log(dest)
+
                 if(dest <= 1500){
                     typeOfFlight = 'Short Flight';
                 }else if (dest <= 3500) {
@@ -104,8 +97,9 @@ async function publishAndStor(){
                 let day = weekday[d.getDay()];
                 const m = ["January","February","March","April","May","June","July","August","September","October","November","December"];
                 let month = m[d.getMonth()];
+              
                 const allData = {
-                    flightNumber :flightInfo.data.response.flight_number,
+                    flightNumber :element[2],
                     period: period,
                     month:month,
                     day:day,
@@ -117,27 +111,30 @@ async function publishAndStor(){
                     arrivalWeather : arrivalWeather,
                     arrivalStatus : arrivalStatus ,
                     lat : flightInfo.data.response.lat,
-                    lng : flightInfo.data.response.lng ,
-                    alt : flightInfo.data.response.alt
+                    lng : flightInfo.data.response.lng 
+                    
 
                 }
+                // console.log(allData)
+
                 if (allData.flightNumber && allData.airline && allData.arrivalAirport && allData.arrivalWeather
                     && allData.departureAirport && allData.departureWeahter && allData.lat && allData.lng 
                     && allData.arrivalStatus && allData.typeOfFlight && allData.period) {
-                 sql.insertToDatabase(allData);
-                // console.log(allData)
-                console.log("befor publishing to kafka");
-                  kafka.publish(allData);
-                 console.log("return up");
-                    }
+                    sql.insertToDatabase(allData);
+                    // console.log(allData)
+                    console.log("befor publishing to kafka")
+                    kafka.publish(allData);
+
+                }
+                
 
             }
         }
-        }
-    
-    }
-                    console.log("for-finish");
+ 
 
+
+        
+    }
     
        setTimeout(publishAndStor,40000) 
 }
@@ -162,7 +159,7 @@ function calcCrow(lat1, lon1, lat2, lon2)
     {
         return Value * Math.PI / 180;
     }
-
-    console.log("innnnn");
     publishAndStor();
-    console.log("innnnn");
+module.exports.apiData = publishAndStor;
+
+
