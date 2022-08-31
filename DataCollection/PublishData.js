@@ -13,22 +13,38 @@ async function publishAndStor(){
         departureWeahter,
         arrivalWeather ,
         arrivalStatus ;
-    
+        
+        // console.log("innnnn fun");
+
     const p =await data.getPeriod().then(res => period = res);
 
     
 
     const flights_Response = await data.getFlights();
     // [dep_iata,arr_iata,flight_iata]
+
     for (let index = 0; index < flights_Response.data.length; index++) {
+
         const element = flights_Response.data[index];
+        
         if(element[0]== 'TLV' || element[1] == 'TLV' ){
-           
+                   console.log(element); 
+
     // flight_number,flag,airline_icao,lat,lng,alt,dep_iata,arr_iata,status,airline_icao,dep_time,arr_time,delayed
             const flightInfo =await data.flightINFO(element[2])
-           
+            
+            console.log("flightInfo: "+element[2]); 
+
             if(flightInfo.data.response){
+                console.log("flightInfo.data.response: "); 
+
+
                 if(data.getTime(flightInfo.data.response.dep_time) || data.getTime(flightInfo.data.response.arr_time)){
+
+                    console.log("data.getTime(flightInfo.data.response.dep_time) || data.getTime(flightInfo.data.response.arr_time) "); 
+
+
+
                 airline =flightInfo.data.response.airline_icao;
                 departureAirport = flightInfo.data.response.dep_iata;
                 arrivalAirport = flightInfo.data.response.arr_iata ;
@@ -40,9 +56,12 @@ async function publishAndStor(){
                 }else{
                     arrivalStatus = 'severely Delayed'
                 }
+                console.log("arrivalStatus: "+arrivalStatus); 
+
 
                 var dep_lat_lng=[];
-                data.getCity(departureAirport).then( res =>{
+
+                await data.getCity(departureAirport).then( res =>{
                     // console.log(res)
                     if(res[0]){
                         dep_lat_lng.push(res[0].lat)
@@ -54,9 +73,11 @@ async function publishAndStor(){
                     
                 }
                 )
+                console.log("dep_lat_lng: "+dep_lat_lng);
+
                 var arr_lat_lng=[];
-                data.getCity(arrivalAirport).then(res =>{
-                    // console.log(res)
+                await data.getCity(arrivalAirport).then(res =>{
+                    console.log(res)
                     if(res[0]){
                         arr_lat_lng.push(res[0].lat)
                         arr_lat_lng.push(res[0].lng)
@@ -66,6 +87,8 @@ async function publishAndStor(){
                     }
                     
                 })
+                console.log("dep_lat_lng: "+arr_lat_lng);
+
                 var dest = calcCrow(dep_lat_lng[0],dep_lat_lng[1],arr_lat_lng[0],arr_lat_lng[1])
                 // console.log(dest)
                 if(dest <= 1500){
@@ -98,14 +121,23 @@ async function publishAndStor(){
                     alt : flightInfo.data.response.alt
 
                 }
-                sql.insertToDatabase(allData);
+                if (allData.flightNumber && allData.airline && allData.arrivalAirport && allData.arrivalWeather
+                    && allData.departureAirport && allData.departureWeahter && allData.lat && allData.lng 
+                    && allData.arrivalStatus && allData.typeOfFlight && allData.period) {
+                 sql.insertToDatabase(allData);
                 // console.log(allData)
-                // console.log("befor publishing to kafka")
-                kafka.publish(allData);
+                console.log("befor publishing to kafka");
+                  kafka.publish(allData);
+                 console.log("return up");
+                    }
+
             }
         }
         }
+    
     }
+                    console.log("for-finish");
+
     
        setTimeout(publishAndStor,40000) 
 }
@@ -131,4 +163,6 @@ function calcCrow(lat1, lon1, lat2, lon2)
         return Value * Math.PI / 180;
     }
 
-publishAndStor()
+    console.log("innnnn");
+    publishAndStor();
+    console.log("innnnn");

@@ -31,7 +31,9 @@ producer.connect();
 module.exports.publish= function (msg){   
   m=JSON.stringify(msg);
   console.log(m); 
-  producer.produce(topic, -1, genMessage(m), uuid.v4());     
+  producer.produce(topic, -1, genMessage(m), uuid.v4());    
+  console.log("finish kafka"); 
+ 
 }
 
 

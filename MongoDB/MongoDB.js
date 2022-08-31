@@ -1,9 +1,8 @@
 const { MongoClient, ServerApiVersion } = require('mongodb')
-const uri = "mongodb+srv://book:3untpx3p@cluster0.kpu9b.mongodb.net/FlightsData?retryWrites=true&w=majority"; 
+const uri = "mongodb+srv://george:3untpx3p@cluster0.kpu9b.mongodb.net/?retryWrites=true&w=majority"; 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const { Parser } = require('json2csv');
 var fs = require('fs');
-
 
 async function insertToMongoDB(data){
   // Connect to our MongoDB's collection
@@ -47,6 +46,6 @@ function exportToCsv(){
     });
   });
 }
-// exportToCsv();
+exportToCsv();
 module.exports.insertToMongoDB = insertToMongoDB;
 module.exports.exportToCsv = exportToCsv;
