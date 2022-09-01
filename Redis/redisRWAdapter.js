@@ -20,6 +20,7 @@ const redisDb = new redis(conn);
 // Function that read data from Redis and publish it to channel "messages"
 async function FromRedisToDashboard(){
     // pull keys from Redis with "Scan" command.
+    
    let redisNowData = await redisDb.scan(0);
    let data=[];
    let values = redisNowData[1];
@@ -33,6 +34,7 @@ async function FromRedisToDashboard(){
             });
         }
     }
+    // console.log("data =====",data)
     return data;
 }
 
@@ -46,7 +48,9 @@ async function FromKafkaToRedis(result){
     await redisDb.hmset(key,result); // insert data to Redis as hash-map
 }
 
-
+module.exports.flushAll = ()=>{
+    redisDb.flushdb("async");
+}
 
 module.exports.FromKafkaToRedis= FromKafkaToRedis;
 module.exports.FromRedisToDashboard= FromRedisToDashboard;

@@ -14,7 +14,6 @@ const kafkaConf = {
   "sasl.password": "TgdA_puHAnYgYxr7p7gENUKgqJuEDPca",
   "debug": "generic,broker,security"
 };
-
 const prefix = "cp2d43br-";
 const topic = `${prefix}new`;
 const producer = new Kafka.Producer(kafkaConf);
@@ -28,12 +27,10 @@ producer.on("ready", function(arg) {
 
 producer.connect();
 
-module.exports.publish= function (msg){   
+module.exports.publish= async function (msg){   
   m=JSON.stringify(msg);
-  console.log(m); 
-  producer.produce(topic, -1, genMessage(m), uuid.v4());    
-  console.log("finish kafka"); 
- 
+  producer.produce(topic, -1, genMessage(m), uuid.v4());   
+  
 }
 
 

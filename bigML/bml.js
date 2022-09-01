@@ -68,7 +68,7 @@ async function predictTopic(element){
                 if(error) throw error;
 
               const output = await prediction.object.probabilities;
-              console.log("model num : \n"+MODEL)
+              // console.log("model num : \n"+MODEL)
               // console.log("prediction.object: \n\n"+JSON.stringify(prediction.object))
 
 
@@ -105,18 +105,18 @@ async function GetPred(element){
  return;
 }
 
-var predictionInput= {
-  flightNumber :"5123",
-  period : "summer",
-  month : "August" ,
-  day : "Monday",
-  airline : "AIZ",
-  departureAirport : "TLV",
-  arrivalAirport : "AMS",
-  typeOfFlight : "short",
-  departureWeahter : "31.62"  ,
-  arrivalWeather : "31.69"
-} 
+// var predictionInput= {
+//   flightNumber :"5123",
+//   period : "summer",
+//   month : "August" ,
+//   day : "Monday",
+//   airline : "AIZ",
+//   departureAirport : "TLV",
+//   arrivalAirport : "AMS",
+//   typeOfFlight : "short",
+//   departureWeahter : "31.62"  ,
+//   arrivalWeather : "31.69"
+// } 
 
 // createModel()
 // predictTopic(predictionInput).then(res=> console.log(res));

@@ -30,11 +30,10 @@ consumer.on("error", function(err) {
 });
 
 consumer.on("ready", function(arg) {
-  // console.log(`Consumer ${arg.name} ready`);
+  console.log(`Consumer ${arg.name} ready`);
   consumer.subscribe(topics);
   consumer.consume();
 });
-
 module.exports.consume = ()=>{
   consumer.on("data", function(m) {
     // insert into MongoDB and Redis
@@ -43,6 +42,7 @@ module.exports.consume = ()=>{
     console.log("data inserted to redis and mongo\n")
   });
 }
+
 
 consumer.on('event.error', function(err) {
   console.error(err);
