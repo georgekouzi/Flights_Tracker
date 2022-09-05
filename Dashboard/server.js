@@ -64,11 +64,11 @@ function updateNewData(){
   });
 // }
 
-  setTimeout(updateNewData,45000);
+  setTimeout(updateNewData,40000);
 }
 
 app.get('/', (req, res) => {
-  redisRWAdapter.flushAll();
+  // redisRWAdapter.flushAll();
   res.render("pages/map")
   updateNewData();
 })
@@ -86,20 +86,39 @@ function getLngLat(data){
   return locations;
 }
 function getFlightsNumber(data){
+
+
+  // i wont the flight that arrival in israel if(arrivalAirport == 'TLV' arrivalTime <= 15 )
+// if(departureAirport == 'TLV' departureTime <= 15)
   
   var arr_flights_sum=0,dep_flights_sum=0;
   var arr_flights_number=[],dep_flights_number = [];
   for (let index = 0; index < data.length; index++) {
       if(data[index].departureAirport == 'TLV' ){
-        if(getTime(data[index].departureAirport)){
+        if(getTime(data[index].departureTime)){
         dep_flights_sum++;
+        console.log("getTime(data[index].departureTime: ",data[index],"dep_flights_sum++: ",dep_flights_sum)
         }
-        dep_flights_number.push(data[index].flightNumber)
+        else{
+          console.log(" flight from israel : ",data[index])
+
+          dep_flights_number.push(data[index].flightNumber)
+        }
       }else if(data[index].arrivalAirport == 'TLV'){
-        if(getTime(data[index].arrivalAirport)){
+        if(getTime(data[index].arrivalTime)){
         arr_flights_sum++;
+        console.log("data[index].arrivalAirport: ",data[index],"arr_flights_sum++: ",arr_flights_sum)
+
         }
-        arr_flights_number.push(data[index].flightNumber)
+        else{
+          console.log(" flight from x to israel : ",data[index])
+
+          arr_flights_number.push(data[index].flightNumber)
+
+        }
+
+
+        
       }
   }
     const output = {
@@ -140,18 +159,21 @@ function getFlightsDataByNumber(data,flights){
     if (data[j].flightNumber == flights[i]) {
       const element = data[j];
 
-      console.log(element)
-      if(getTime(element.arrivalTime)||getTime(element.departureTime)){
-        console.log(" 15 minuts flight!!!!!!!! ")
-      str += `Flight Number is ${element.flightNumber}
+      // console.log(element)
+      if((element.arrivalAirport = 'TLV' && getTime(element.arrivalTime))||(element.departureAirport = 'TLV' && getTime(element.departureTime))){
+        console.log("this fligh get card: ",element)
+          str += `Flight Number is ${element.flightNumber}
           Airline : ${element.airline}
           Departure Airport : ${element.departureAirport}
           Arrival Airport : ${element.arrivalAirport}
           Departure Weahter : ${element.departureWeahter}
           Arrival Weather : ${element.arrivalWeather}
           The flight will be : ${element.arrivalStatus}
-          
           `;
+    }
+    else{
+      console.log("this fligh dont get card: ",element)
+
     }
   }
     }
@@ -165,7 +187,8 @@ function getTime(timeStamp){
   var today = new Date();
   var TimeInMin = ((parseInt(today.getHours()))*60 + parseInt(today.getMinutes()));
   
-  if(Math.abs((hours+min)- TimeInMin) <= 15){
+  var dt =(hours+min)- TimeInMin;
+    if((dt >= 0) && (dt <= 15)){
       return true
   }else return false ;
 

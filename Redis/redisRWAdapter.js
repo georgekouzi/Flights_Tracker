@@ -30,11 +30,19 @@ async function FromRedisToDashboard(){
         if(values.length >= data.length){
             let element = values[index];
             await redisDb.hgetall(element).then(dataForPublish => {
-                data.push(dataForPublish); // Push the values to data array and send it to Redis publisher
+                // console.log(dataForPublish)
+                if(timeOfNow(dataForPublish.arrivalTime)){
+                    data.push(dataForPublish); // Push the values to data array and send it to Redis publisher
+                }
+                else{
+                    redisDb.del(dataForPublish.flightNumber)
+                }
+
+
             });
         }
     }
-    // console.log("data =====",data)
+    console.log("data =====",data)
     return data;
 }
 
@@ -52,5 +60,23 @@ module.exports.flushAll = ()=>{
     redisDb.flushdb("async");
 }
 
+function timeOfNow(timeStamp){
+
+    var time = timeStamp.split(":");
+    var hours = parseInt(time[0])*60
+    var min = parseInt(time[1])
+    
+    var today = new Date();
+
+    // console.log(today.getTime() ==inData )
+    var TimeInMin = ((parseInt(today.getHours()))*60 + parseInt(today.getMinutes()));
+    var dt =(hours+min)- TimeInMin;
+    if(dt > 0){
+        return true
+    }else return false ;
+
+}
+// timeOfNow()
 module.exports.FromKafkaToRedis= FromKafkaToRedis;
 module.exports.FromRedisToDashboard= FromRedisToDashboard;
+FromRedisToDashboard()
