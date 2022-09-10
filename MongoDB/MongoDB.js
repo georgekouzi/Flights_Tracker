@@ -6,11 +6,6 @@ var fs = require('fs');
 
 
 async function insertToMongoDB(data){
-  // Connect to our MongoDB's collection
-  // client.connect(err => {
-  //   if (err) throw err;
-  //   const collection = client.db("FlightsData").collection("flights");
-  // });
   // Connect + Insert to the MongoDB
   client.connect(async function(err, db) {
     data = JSON.parse(data)

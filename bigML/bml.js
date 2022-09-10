@@ -59,7 +59,6 @@ async function predictTopic(element){
                 departureWeahter : element.departureWeahter  ,
                 arrivalWeather : element.arrivalWeather
               } 
-              // https://bigml.com/dashboard/model/630e2905aba2df5330000c77
               var prediction =  new bigml.Prediction(connection);
               if(predictionInput && prediction ){
                 // console.log("predictionInput: "+JSON.stringify(predictionInput))

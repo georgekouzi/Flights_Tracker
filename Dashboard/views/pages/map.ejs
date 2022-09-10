@@ -9,7 +9,7 @@
 
 <head>
     <title>מעקב טיסות נתב"ג</title>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"  />
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
         var socket = io.connect();
@@ -23,24 +23,22 @@
             })
             map = new Microsoft.Maps.Map(document.getElementById("myMap"),
              { credentials: "Am7ABZsl1hVs093AjZV82C3wxd-NCQ-KtBLpdtv4uB1UBvqIx7vcgN7Dw1A9RpQt" });
-
             socket.on('flights counter', function (msg) {
                 // 
-                document.getElementById("arrFlightsNumber").innerText = msg['arrFlightsSum'] ;
-                document.getElementById("depFlightsNumber").innerText = msg['depFlightsSum'];
+                // alert(`arraival flights = ${msg.arrFlightsSum}`)
+                // alert(`departuer flights = ${msg.depFlightsSum}`)
+                document.getElementById("arrFlightsNumber").innerText = msg.arrFlightsSum;
+                document.getElementById("depFlightsNumber").innerText = msg.depFlightsSum;
             })
             
             
-
-
-
            
             socket.on('flights data1', function (msg) {
             //   alert(msg)
             if(msg ){
                 document.getElementById("arrFlightsData").innerText = msg;  
             }else{                
-                document.getElementById("arrFlightsData").innerText = "waiting for the prediction"  ;
+                document.getElementById("arrFlightsData").innerText = "No arrival filghts in the next 15 min'"  ;
             }
             })
             socket.on('flights data2', function (msg) {
@@ -48,7 +46,7 @@
             if(msg ){
                 document.getElementById("depFlightsData").innerText = msg;  
             }else{                
-                document.getElementById("depFlightsData").innerText = "waiting for the prediction"  ;
+                document.getElementById("depFlightsData").innerText = "No departure filghts in the next 15 min'"  ;
             }
             })
             
@@ -79,7 +77,6 @@
             element.innerText = `${hour}:${minute}  ${day}-${month}-${year} `;
             setTimeout(setClock, 1000);
       }
-
         </script>
         <script type='text/javascript'>
             function add(){
@@ -96,18 +93,14 @@
                         infobox = new Microsoft.Maps.Infobox(loc1, {
                             visible: false
                         });
-
                         //Assign the infobox to a map instance.
                         infobox.setMap(map);
-
                        
                         pin1.metadata = {
                             title: `${element.flightNumber}`, 
                         };
-
                         //Add a click event handler to the pushpin.
                         Microsoft.Maps.Events.addHandler(pin1, 'click', pushpinClicked);
-
                                     
                                     map.entities.push(pin1);                                
                         }   
@@ -117,8 +110,6 @@
                 
                 setTimeout(add,10000);
             }
-
-
             function pushpinClicked(e) {
                 //Make sure the infobox has metadata to display.
                 if (e.target.metadata) {
@@ -158,52 +149,68 @@
       <div id="b1" class="containerTab" style="display:none;background:green">
         <!-- If you want the ability to close the container, add a close button -->
         <span onclick="this.parentElement.style.display='none'" class="closebtn">x</span>
-        <h2>טיסות ממתינות לנחיתה
+        <h2 class="info">טיסות ממתינות לנחיתה
         </h2>
         <p id="arrFlightsData"></p>
       </div>
       
-      <div id="b2" class="containerTab" style="display:none;background:blue">
+      <div id="b2" class="containerTab" style="display:none;background: blue  ">
         <span onclick="this.parentElement.style.display='none'" class="closebtn">x</span>
-        <h2>טיסות ממתינות להמראה
+        <h2 class="info">טיסות ממתינות להמראה
         </h2>
         <p  id="depFlightsData"></p>
       </div>
       
-      <div id="b3" class="containerTab" style="display:none;background:red">
-        <span onclick="this.parentElement.style.display='none'" class="closebtn">x</span>
-        <h2>מזג אוויר</h2>
-        <h4 id="weather"></h4>
-      </div>
       <style>
+        .info {
+            white-space: nowrap;
+            overflow: hidden;
+            width: 10em;
+            animation: anim 4s infinite;
+        }
+        @keyframes anim{
+            from {width: 0;} ;
+        }
         .column {
-            float: left;
+            border-radius: 20px 100px;
+            box-shadow:  10px 10px 10px grey;
+            float: left; 
             width: 25%;
+            height: 25%;
             padding: 50px;
             text-align: center;
             font-size: 25px;
             cursor: pointer;
             color: white;
             }
-
-            .containerTab {
+        .containerTab {
+            border-radius: 20px ;
+            box-shadow:  10px 10px 10px grey;
             padding: 20px;
+            padding-top : 30px;
             color: white;
             }
-
             /* Clear floats after the columns */
             .row:after {
             content: "";
             display: table;
             clear: both;
             }
-
             /* Closable button inside the image */
             .closebtn {
             float: right;
             color: white;
             font-size: 35px;
             cursor: pointer;
+            }
+            .button {
+                top:50%;
+                background-color:#0a0a23;
+                color: #fff;
+                border:none;
+                border-radius:10px;
+                box-shadow: 0px 0px 2px 2px rgb(0,0,0);
+                
             }
       </style>
     <script>
@@ -224,22 +231,18 @@
             height: 500px;">
                 
 <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=Am7ABZsl1hVs093AjZV82C3wxd-NCQ-KtBLpdtv4uB1UBvqIx7vcgN7Dw1A9RpQt'async defer>
-
 </script>
 
 </head>
 
-<body onload="setMap()">
+<body  onload="setMap()" >
 <div id="myMap" >
-
 </div>
-<button onclick="creatNewModel()" type="button">Get New Model (:</button>
+<button class="button" onclick="creatNewModel()" type="button">Get New Model (:</button>
 <script>
     function creatNewModel(){
         socket.emit("get new model", "new model" );
+        alert("A new prediction model is being created")
     }
 </script>
-
 </body>
-</body>
-</div>
